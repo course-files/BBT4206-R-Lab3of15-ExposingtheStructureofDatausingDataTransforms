@@ -1,5 +1,5 @@
 # *****************************************************************************
-# Lab 3: Exposing the Structure of Data using Data Transforms ----
+# Lab 4: Exposing the Structure of Data using Data Transforms ----
 #
 # Course Code: BBT4206
 # Course Name: Business Intelligence II
@@ -903,27 +903,27 @@ renv::snapshot()
 # **Required Lab Work Submission** ----
 ## Part A ----
 # Create a new file called
-# "Lab3-Submission-ExposingTheStructureOfDataUsingDataTransforms.R".
+# "Lab4-Submission-ExposingTheStructureOfDataUsingDataTransforms.R".
 # Provide all the code you have used to perform data transformation on the
 # "BI1 Class Performance" dataset provided in class. Perform ALL the data
 # transformations that have been used in the
-# "Lab3-ExposingTheStructureOfDataUsingDataTransforms.R" file.
+# "Lab4-ExposingTheStructureOfDataUsingDataTransforms.R" file.
 
 ## Part B ----
 # Upload *the link* to your
-# "Lab3-Submission-ExposingTheStructureOfDataUsingDataTransforms.R" hosted
+# "Lab4-Submission-ExposingTheStructureOfDataUsingDataTransforms.R" hosted
 # on Github (do not upload the .R file itself) through the submission link
 # provided on eLearning.
 
 ## Part C ----
 # Create a markdown file called
-# "Lab3-Submission-ExposingTheStructureOfDataUsingDataTransforms.Rmd"
+# "Lab4-Submission-ExposingTheStructureOfDataUsingDataTransforms.Rmd"
 # and place it inside the folder called "markdown".
 
 ## Part D ----
 # Knit the R markdown file using knitR in R Studio.
 # Upload *the link* to
-# "Lab3-Submission-ExposingTheStructureOfDataUsingDataTransforms.md"
+# "Lab4-Submission-ExposingTheStructureOfDataUsingDataTransforms.md"
 # (not .Rmd) markdown file hosted on Github (do not upload the .Rmd or .md
 # markdown files) through the submission link
 # provided on eLearning.
