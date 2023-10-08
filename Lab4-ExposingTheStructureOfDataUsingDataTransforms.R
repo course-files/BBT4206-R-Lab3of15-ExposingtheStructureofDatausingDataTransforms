@@ -176,6 +176,22 @@ if (require("e1071")) {
                    repos = "https://cloud.r-project.org")
 }
 
+## factoextra ----
+if (require("factoextra")) {
+  require("factoextra")
+} else {
+  install.packages("factoextra", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## FactoMineR ----
+if (require("FactoMineR")) {
+  require("FactoMineR")
+} else {
+  install.packages("FactoMineR", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
 ## STEP 2. Load the Datasets ----
 
 ### The Boston Housing Dataset ----
@@ -970,10 +986,10 @@ for (i in 1:8) {
 # Principal Component Analysis (PCA) Linear Algebra Transform ----
 
 ## Dimensionality Reduction versus Feature Selection ----
-# PCA and ICA are primarily a dimensionality reduction technique used to
+# PCA and ICA are primarily dimensionality reduction techniques used to
 # transform high-dimensional data into a lower-dimensional space while
-# retaining as much variance as possible. However, it can indirectly assist in
-# feature selection by identifying the most important features or components.
+# retaining as much variance as possible. However, they can indirectly assist
+# in feature selection by identifying the most important features or components.
 
 # Feature selection and dimensionality reduction are both techniques used to
 # reduce the number of features (variables) in a dataset, but they serve
@@ -1009,7 +1025,7 @@ for (i in 1:8) {
 #    - **Result**: The result is a reduced-dimensional dataset with fewer
 #                   features (principal components) than the original dataset.
 #                   These new features are typically linearly uncorrelated and
-#                   orthogonal to each other.
+#                   orthogonal (statistically independent) to each other.
 #    - **Interpretability**: The principal components created by dimensionality
 #                   reduction may not have direct interpretability because they
 #                   are linear combinations of original features. However, they
@@ -1045,8 +1061,6 @@ for (i in 1:8) {
 # If the data has both quantitative and qualitative values, then Multiple
 # Factor Analysis (MFA) or Factor Analysis of Mixed Data (FAMD) can be used
 # instead.
-
-# Tutorial: https://www.datacamp.com/tutorial/pca-analysis-r
 
 ### PCA for Dimensionality Reduction on the Boston Housing Dataset ----
 # The initial 13 numeric variables in the Boston Housing dataset are reduced to
@@ -1102,11 +1116,6 @@ summary(boston_housing_pca_fe)
 #### Scree Plot ----
 # The Scree Plot shows that the 1st 2 principal components can cumulatively
 # explain 92.8% of the variance, i.e., 87.7% + 5.1% = 92.8%.
-if (!is.element("factoextra", installed.packages()[, 1])) {
-  install.packages("factoextra", dependencies = TRUE)
-}
-require("factoextra")
-
 factoextra::fviz_eig(boston_housing_pca_fe, addlabels = TRUE)
 
 #### Loading Values ----
@@ -1123,12 +1132,8 @@ boston_housing_pca_fe$loadings[, 1:2]
 # which each variable is represented in a given component.
 
 # In this case, it shows the extent to which each variable is represented in
-# the first 2 components:
+# the first 2 components.
 
-if (!is.element("FactoMineR", installed.packages()[, 1])) {
-  install.packages("FactoMineR", dependencies = TRUE)
-}
-require("FactoMineR")
 
 # Points to note when interpreting the visualization:
 # The Cos2 value is the square cosine. It corresponds to the quality of
@@ -1138,7 +1143,7 @@ require("FactoMineR")
 #    (ii) A high value, on the other hand, means a good representation of the
 #         variable on that component.
 
-factoextra::fviz_cos2(boston_housing_pca_fe, choice = "var", axes = 1:4)
+factoextra::fviz_cos2(boston_housing_pca_fe, choice = "var", axes = 1:2)
 
 # The 8 most represented variables in the first 2 components (which we said
 # represent 92.8% of the variation) are, in descending order: indus, nox,
@@ -1153,7 +1158,7 @@ factoextra::fviz_cos2(boston_housing_pca_fe, choice = "var", axes = 1:4)
 #    (iii) Variables that are negatively correlated are displayed in the
 #          opposite side of the origin.
 
-factoextra::fviz_pca_var(boston_housing_pca, col.var = "cos2",
+factoextra::fviz_pca_var(boston_housing_pca_fe, col.var = "cos2",
                          gradient.cols = c("red", "orange", "green"),
                          repel = TRUE)
 
@@ -1187,9 +1192,9 @@ factoextra::fviz_cos2(pima_indians_diabetes_fe,
 #### Biplot and Cos2 Combined Plot ----
 # This can be confirmed using the following visualization.
 
-fviz_pca_var(pima_indians_diabetes_fe, col.var = "cos2",
-             gradient.cols = c("red", "black", "green"),
-             repel = TRUE)
+factoextra::fviz_pca_var(pima_indians_diabetes_fe, col.var = "cos2",
+                         gradient.cols = c("red", "black", "green"),
+                         repel = TRUE)
 
 
 # Independent Component Analysis (ICA) Linear Algebra Transform ----
@@ -1264,7 +1269,7 @@ summary(pima_indians_diabetes_ica)
 # Create a new file called
 # "Lab4-Submission-ExposingTheStructureOfDataUsingDataTransforms.R".
 # Provide all the code you have used to perform data transformation on the
-# "BI1 Class Performance" dataset provided in class. Perform ALL the data
+# "BI1 Student Performance" dataset provided in class. Perform ALL the data
 # transformations that have been used in the
 # "Lab4-ExposingTheStructureOfDataUsingDataTransforms.R" file.
 
@@ -1275,14 +1280,40 @@ summary(pima_indians_diabetes_ica)
 # provided on eLearning.
 
 ## Part C ----
-# Create a markdown file called
-# "Lab4-Submission-ExposingTheStructureOfDataUsingDataTransforms.Rmd"
-# and place it inside the folder called "markdown".
+# Create a markdown file called "Lab-Submission-Markdown.Rmd"
+# and place it inside the folder called "markdown". Use R Studio to ensure the
+# .Rmd file is based on the "GitHub Document (Markdown)" template when it is
+# being created.
+
+# Refer to the following file in Lab 1 for an example of a .Rmd file based on
+# the "GitHub Document (Markdown)" template:
+#     https://github.com/course-files/BBT4206-R-Lab1of15-LoadingDatasets/blob/main/markdown/BIProject-Template.Rmd # nolint
+
+# Include Line 1 to 14 of BIProject-Template.Rmd in your .Rmd file to make it
+# displayable on GitHub when rendered into its .md version
+
+# It should have code chunks that explain the
+# data transformation performed on the dataset.
 
 ## Part D ----
-# Knit the R markdown file using knitR in R Studio.
-# Upload *the link* to
-# "Lab4-Submission-ExposingTheStructureOfDataUsingDataTransforms.md"
-# (not .Rmd) markdown file hosted on Github (do not upload the .Rmd or .md
-# markdown files) through the submission link
-# provided on eLearning.
+# Render the .Rmd (R markdown) file into its .md (markdown) version by using
+# knitR in RStudio.
+
+# You need to download and install "pandoc" to render the R markdown.
+# Pandoc is a file converter that can be used to convert the following files:
+#   https://pandoc.org/diagram.svgz?v=20230831075849
+
+# Documentation:
+#   https://pandoc.org/installing.html and
+#   https://github.com/REditorSupport/vscode-R/wiki/R-Markdown
+
+# By default, Rmd files are open as Markdown documents. To enable R Markdown
+# features, you need to associate *.Rmd files with rmd language.
+# Add an entry Item "*.Rmd" and Value "rmd" in the VS Code settings,
+# "File Association" option.
+
+# Documentation of knitR: https://www.rdocumentation.org/packages/knitr/
+
+# Upload *the link* to "Lab-Submission-Markdown.md" (not .Rmd)
+# markdown file hosted on Github (do not upload the .Rmd or .md markdown files)
+# through the submission link provided on eLearning.
