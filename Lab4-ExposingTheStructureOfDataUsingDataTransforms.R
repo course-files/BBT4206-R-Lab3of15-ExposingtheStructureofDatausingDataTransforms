@@ -16,45 +16,24 @@
 # See LICENSE file for licensing information.
 # *****************************************************************************
 
-# Introduction ----
-# Data transforms can improve the accuracy of your final model when applied as
-# part of the pre-processing stage. It is standard practice to apply multiple
-# transforms with a suite of different machine learning algorithms. Data
-# transforms can be grouped into the following 3 categories:
-#   (i)	Basic data transforms: scaling, centering, standardization, and
-#       normalization
-#   (ii)	Power transforms: Box-Cox and Yeo-Johnson
-#   (iii)	Linear algebra transforms: Principal Component Analysis (PCA) and
-#         Independent Component Analysis (ICA)
-
-# The first step is to design a model of the transform using the training data.
-# This results in a model of the transform that can be applied to multiple
-# datasets. The preparation of the model of the transform is done using the
-# preProcess() function. The model of the transform can then be applied to a
-# dataset in either of the following two ways:
-#   (i)	Standalone: The model of the transform is passed to the predict()
-#       function
-#   (ii)	Training: The model of the transform is passed to the train()
-#         function via the preProcess argument. This is done during the model
-#         evaluation stage.
-# Note that the preProcess() function ignores non-numeric attributes.
-
-# *** Initialization: Install and use renv ----
-# The renv package helps you create reproducible environments for your R
-# projects. This is helpful when working in teams because it makes your R
-# projects more isolated, portable and reproducible.
+# **[OPTIONAL] Initialization: Install and use renv ----
+# The R Environment ("renv") package helps you create reproducible environments
+# for your R projects. This is helpful when working in teams because it makes
+# your R projects more isolated, portable and reproducible.
 
 # Further reading:
 #   Summary: https://rstudio.github.io/renv/
 #   More detailed article: https://rstudio.github.io/renv/articles/renv.html
 
-# Install renv:
-if (!is.element("renv", installed.packages()[, 1])) {
-  install.packages("renv", dependencies = TRUE)
-}
-require("renv")
+# "renv" It can be installed as follows:
+# if (!is.element("renv", installed.packages()[, 1])) {
+# install.packages("renv", dependencies = TRUE,
+# repos = "https://cloud.r-project.org") # nolint
+# }
+# require("renv") # nolint
 
-# Use renv::init() to initialize renv in a new or existing project.
+# Once installed, you can then use renv::init() to initialize renv in a new
+# project.
 
 # The prompt received after executing renv::init() is as shown below:
 # This project already has a lockfile. What would you like to do?
@@ -65,12 +44,24 @@ require("renv")
 # 4: Abort project initialization.
 
 # Select option 1 to restore the project from the lockfile
-renv::init()
+# renv::init() # nolint
 
 # This will set up a project library, containing all the packages you are
 # currently using. The packages (and all the metadata needed to reinstall
 # them) are recorded into a lockfile, renv.lock, and a .Rprofile ensures that
-# the library is used every time you open that project.
+# the library is used every time you open the project.
+
+# Consider a library as the location where packages are stored.
+# Execute the following command to list all the libraries available in your
+# computer:
+.libPaths()
+
+# One of the libraries should be a folder inside the project if you are using
+# renv
+
+# Then execute the following command to see which packages are available in
+# each library:
+lapply(.libPaths(), list.files)
 
 # This can also be configured using the RStudio GUI when you click the project
 # file, e.g., "BBT4206-R.Rproj" in the case of this project. Then
@@ -85,42 +76,115 @@ renv::init()
 # following command: renv::clean()
 
 # After you have confirmed that your code works as expected, use
-# renv::snapshot() to record the packages and their
+# renv::snapshot(), AT THE END, to record the packages and their
 # sources in the lockfile.
 
 # Later, if you need to share your code with someone else or run your code on
 # a new machine, your collaborator (or you) can call renv::restore() to
 # reinstall the specific package versions recorded in the lockfile.
 
+# [OPTIONAL]
 # Execute the following code to reinstall the specific package versions
-# recorded in the lockfile:
-renv::restore()
+# recorded in the lockfile (restart R after executing the command):
+# renv::restore() # nolint
 
-# One of the packages required to use R in VS Code is the "languageserver"
-# package. It can be installed manually as follows if you are not using the
-# renv::restore() command.
-if (!is.element("languageserver", installed.packages()[, 1])) {
-  install.packages("languageserver", dependencies = TRUE)
+# [OPTIONAL]
+# If you get several errors setting up renv and you prefer not to use it, then
+# you can deactivate it using the following command (restart R after executing
+# the command):
+# renv::deactivate() # nolint
+
+# If renv::restore() did not install the "languageserver" package (required to
+# use R for VS Code), then it can be installed manually as follows (restart R
+# after executing the command):
+
+if (require("languageserver")) {
+  require("languageserver")
+} else {
+  install.packages("languageserver", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
 }
-require("languageserver")
 
-## STEP 1. Load the Datasets ----
+# Introduction ----
+# Data transforms can improve the accuracy of your final model when applied as
+# part of the pre-processing stage. It is standard practice to apply multiple
+# transforms with a suite of different machine learning algorithms. Data
+# transforms can be grouped into the following 3 categories:
+#   (i)	Basic data transforms:
+#              a. Scaling: Divides each value by the standard deviation
+#              b. Centering: Subtracts the mean from each value
+#              c. Standardization: Ensures that each numeric attribute has a
+#                   mean value of 0 and a standard deviation of 1. This is done
+#                   by combining the scale data transform and the centre data
+#                   transform.
+#              d. Normalization: Ensures the numerical data are between [0, 1]
+#                   (inclusive).
+#   (ii)	Power transforms:
+#              a. Box-Cox: reduces the skewness by shifting the distribution of
+#                   an attribute and making the attribute have a more
+#                   Gaussian-like distribution.
+#              b. Yeo-Johnson: like Box-Cox, Yeo-Johnson reduces the skewness
+#                   by shifting the distribution of an attribute and making the
+#                   attribute have a more Gaussian-like distribution.
+#                   The difference is that Yeo-Johnson can handle zero and
+#                   negative values.
+#   (iii)	Linear algebra transforms: Principal Component Analysis (PCA) and
+#         Independent Component Analysis (ICA)
+
+# The first step is to design a model of the transform using the training data.
+# This results in a model of the transform that can be applied to multiple
+# datasets. The preparation of the model of the transform is done using the
+# preProcess() function. The model of the transform can then be applied to a
+# dataset in either of the following two ways:
+#   (i)	Standalone: The model of the transform is passed to the predict()
+#         function
+#   (ii)	Training: The model of the transform is passed to the train()
+#         function via the preProcess argument. This is done during the model
+#         evaluation stage.
+# Note that the preProcess() function ignores non-numeric attributes.
+
+# STEP 1. Install and Load the Required Packages ----
+## mlbench ----
+if (require("mlbench")) {
+  require("mlbench")
+} else {
+  install.packages("mlbench", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## readr ----
+if (require("readr")) {
+  require("readr")
+} else {
+  install.packages("readr", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## caret ----
+if (require("caret")) {
+  require("caret")
+} else {
+  install.packages("caret", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## e1071 ----
+if (require("e1071")) {
+  require("e1071")
+} else {
+  install.packages("e1071", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## STEP 2. Load the Datasets ----
 
 ### The Boston Housing Dataset ----
 # Execute the following to load the “BostonHousing” dataset which is offered
 # in the "mlbench" package:
-if (!is.element("mlbench", installed.packages()[, 1])) {
-  install.packages("mlbench", dependencies = TRUE)
-}
-require("mlbench")
 data("BostonHousing")
 
 ### Crop Dataset ----
 # Execute the following to load the downloaded Crop dataset:
-if (!is.element("readr", installed.packages()[, 1])) {
-  install.packages("readr", dependencies = TRUE)
-}
-require("readr")
 crop_dataset <- read_csv("data/crop.data.csv",
   col_types = cols(
     density = col_factor(levels = c("1", "2")),
@@ -144,46 +208,207 @@ data("PimaIndiansDiabetes")
 
 # Scale Data Transform ----
 
-## STEP 2. Apply a Scale Data Transform ----
+## STEP 3. Apply a Scale Data Transform ----
 # The scale data transform is useful for scaling data that has a Gaussian
 # distribution. The scale data transform works by calculating the standard
 # deviation of an attribute and then divides each value by the standard
 # deviation.
 
-# The "preProcess()" function is in the caret package
-if (!is.element("caret", installed.packages()[, 1])) {
-  install.packages("caret", dependencies = TRUE)
-}
-require("caret")
+### Benefits of Scaling ----
+#### 1. Facilitating Algorithm Convergence ----
+# Many machine learning algorithms, such as gradient descent-based methods and
+# support vector machines, work more efficiently and converge faster when the
+# input features are on similar scales. Rescaling the data helps prevent some
+# features from dominating the learning process.
+
+#### 2. Improving Interpretability ----
+# Scaling makes it easier to compare the importance of different features in a
+# model. When features have different scales, it can be challenging to
+# interpret their relative contributions.
+
+#### 3.Enhancing Model Performance ----
+# Some machine learning algorithms, like k-nearest neighbors and principal
+# component analysis, are sensitive to the scale of the data. Scaling can lead
+# to better model performance and more reliable results.
+
+#### 4. Handling Outliers ----
+# Standardizing data can help mitigate the impact of outliers. Outliers are
+# data points that are significantly different from the majority of the data.
+# If not properly handled, outliers can distort model predictions.
+
+#### 5. Comparing Variables ----
+# Scaling allows you to compare variables that have different units or
+# measurement scales. For example, you can compare variables like age and
+# income on the same scale after scaling.
+
+# We use the "preProcess()" function in the caret package
 
 ### The Scale Basic Transform on the Boston Housing Dataset ----
+# BEFORE
 summary(BostonHousing)
+hist(BostonHousing[, 1], main = names(BostonHousing)[1])
+hist(BostonHousing[, 2], main = names(BostonHousing)[2])
+hist(BostonHousing[, 3], main = names(BostonHousing)[3])
+hist(BostonHousing[, 5], main = names(BostonHousing)[5])
+hist(BostonHousing[, 6], main = names(BostonHousing)[6])
+hist(BostonHousing[, 7], main = names(BostonHousing)[7])
+hist(BostonHousing[, 8], main = names(BostonHousing)[8])
+hist(BostonHousing[, 9], main = names(BostonHousing)[9])
+hist(BostonHousing[, 10], main = names(BostonHousing)[10])
+hist(BostonHousing[, 11], main = names(BostonHousing)[11])
+hist(BostonHousing[, 12], main = names(BostonHousing)[12])
+hist(BostonHousing[, 13], main = names(BostonHousing)[13])
+hist(BostonHousing[, 14], main = names(BostonHousing)[14])
+
 model_of_the_transform <- preProcess(BostonHousing, method = c("scale"))
 print(model_of_the_transform)
 boston_housing_scale_transform <- predict(model_of_the_transform,
                                           BostonHousing)
+# AFTER
 summary(boston_housing_scale_transform)
+hist(boston_housing_scale_transform[, 1],
+     main = names(boston_housing_scale_transform)[1])
+hist(boston_housing_scale_transform[, 2],
+     main = names(boston_housing_scale_transform)[2])
+hist(boston_housing_scale_transform[, 3],
+     main = names(boston_housing_scale_transform)[3])
+hist(boston_housing_scale_transform[, 5],
+     main = names(boston_housing_scale_transform)[5])
+hist(boston_housing_scale_transform[, 6],
+     main = names(boston_housing_scale_transform)[6])
+hist(boston_housing_scale_transform[, 7],
+     main = names(boston_housing_scale_transform)[7])
+hist(boston_housing_scale_transform[, 8],
+     main = names(boston_housing_scale_transform)[8])
+hist(boston_housing_scale_transform[, 9],
+     main = names(boston_housing_scale_transform)[9])
+hist(boston_housing_scale_transform[, 10],
+     main = names(boston_housing_scale_transform)[10])
+hist(boston_housing_scale_transform[, 11],
+     main = names(boston_housing_scale_transform)[11])
+hist(boston_housing_scale_transform[, 12],
+     main = names(boston_housing_scale_transform)[12])
+hist(boston_housing_scale_transform[, 13],
+     main = names(boston_housing_scale_transform)[13])
+hist(boston_housing_scale_transform[, 14],
+     main = names(boston_housing_scale_transform)[14])
 
 ### The Scale Basic Transform on the Crop Dataset ----
+# BEFORE
 summary(crop_dataset)
+# The code below converts column number 4 into unlisted and numeric data first
+# so that a histogram can be plotted. Further reading:
+crop_dataset_yield <- as.numeric(unlist(crop_dataset[, 4]))
+hist(crop_dataset_yield, main = names(crop_dataset)[4])
+
 model_of_the_transform <- preProcess(crop_dataset, method = c("scale"))
 print(model_of_the_transform)
 crop_data_scale_transform <- predict(model_of_the_transform, crop_dataset)
+
+# AFTER
 summary(crop_data_scale_transform)
+crop_dataset_yield <- as.numeric(unlist(crop_data_scale_transform[, 4]))
+hist(crop_dataset_yield, main = names(crop_data_scale_transform)[4])
 
 # Center Data Transform ----
 
-## STEP 3. Apply a Centre Data Transform ----
+## STEP 4. Apply a Centre Data Transform ----
 # The centre data transform calculates the mean of an attribute and subtracts
 # it from each value.
 
+### Benefits of Centering ----
+#### 1. Removes the Effect of the Mean ----
+# Centering makes the data's mean equal to zero. By subtracting the mean from
+# each data point, you effectively remove any systematic bias or shift in the
+# data. This is particularly useful when you want to focus on variations or
+# deviations from the mean.
+
+#### 2. Interpretability ----
+# Centering enhances the interpretability of data. When data is centered, the
+# coefficients or parameters in statistical models become more interpretable.
+# For example, in linear regression, the intercept (constant term) represents
+# the predicted value when all predictor variables are at their means, making
+# it easier to understand the effect of the predictors.
+
+#### 3. Stabilizes Numerical Computations ----
+# In some numerical algorithms, centering data can improve the numerical
+# stability of computations. Centering often reduces large numerical values and
+# can prevent issues like numerical instability or overflow in certain
+# calculations.
+
+#### 4. Facilitates Comparison ----
+# When working with multiple variables or features with different units or
+# measurement scales, centering helps standardize these variables for
+# meaningful comparisons. It makes it easier to assess the relative impact or
+# importance of different features in a model.
+
+#### 5. Eases Visual Interpretation ----
+# Centering can simplify the interpretation of data visualizations, such as
+# scatter plots. By centering the data, you can focus on the shape of the
+# distribution around the center (mean) rather than being influenced by the
+# location of the data in the plot.
+
+#### 6. Improves Model Convergence ----
+# Some optimization algorithms used in statistical modeling and machine
+# learning may converge more quickly and stably when data is centered.
+# This is particularly relevant when dealing with iterative optimization
+# procedures.
+
+#### 7. Handling Interaction Terms ----
+# When creating interaction terms in regression models, centering the variables
+# involved in the interaction can help in reducing multicollinearity and
+# improve the interpretation of interaction effects.
+
 ### The Centre Basic Transform on the Boston Housing Dataset ----
+# BEFORE
 summary(BostonHousing)
+boxplot(BostonHousing[, 1], main = names(BostonHousing)[1])
+boxplot(BostonHousing[, 2], main = names(BostonHousing)[2])
+boxplot(BostonHousing[, 3], main = names(BostonHousing)[3])
+boxplot(BostonHousing[, 5], main = names(BostonHousing)[5])
+boxplot(BostonHousing[, 6], main = names(BostonHousing)[6])
+boxplot(BostonHousing[, 7], main = names(BostonHousing)[7])
+boxplot(BostonHousing[, 8], main = names(BostonHousing)[8])
+boxplot(BostonHousing[, 9], main = names(BostonHousing)[9])
+boxplot(BostonHousing[, 10], main = names(BostonHousing)[10])
+boxplot(BostonHousing[, 11], main = names(BostonHousing)[11])
+boxplot(BostonHousing[, 12], main = names(BostonHousing)[12])
+boxplot(BostonHousing[, 13], main = names(BostonHousing)[13])
+boxplot(BostonHousing[, 14], main = names(BostonHousing)[14])
+
 model_of_the_transform <- preProcess(BostonHousing, method = c("center"))
 print(model_of_the_transform)
 boston_housing_center_transform <- predict(model_of_the_transform, # nolint
                                            BostonHousing)
+
+# AFTER
 summary(boston_housing_center_transform)
+boxplot(boston_housing_center_transform[, 1],
+        main = names(boston_housing_center_transform)[1])
+boxplot(boston_housing_center_transform[, 2],
+        main = names(boston_housing_center_transform)[2])
+boxplot(boston_housing_center_transform[, 3],
+        main = names(boston_housing_center_transform)[3])
+boxplot(boston_housing_center_transform[, 5],
+        main = names(boston_housing_center_transform)[5])
+boxplot(boston_housing_center_transform[, 6],
+        main = names(boston_housing_center_transform)[6])
+boxplot(boston_housing_center_transform[, 7],
+        main = names(boston_housing_center_transform)[7])
+boxplot(boston_housing_center_transform[, 8],
+        main = names(boston_housing_center_transform)[8])
+boxplot(boston_housing_center_transform[, 9],
+        main = names(boston_housing_center_transform)[9])
+boxplot(boston_housing_center_transform[, 10],
+        main = names(boston_housing_center_transform)[10])
+boxplot(boston_housing_center_transform[, 11],
+        main = names(boston_housing_center_transform)[11])
+boxplot(boston_housing_center_transform[, 12],
+        main = names(boston_housing_center_transform)[12])
+boxplot(boston_housing_center_transform[, 13],
+        main = names(boston_housing_center_transform)[13])
+boxplot(boston_housing_center_transform[, 14],
+        main = names(boston_housing_center_transform)[14])
 
 ### The Centre Basic Transform on the Crop Dataset ----
 summary(crop_dataset)
@@ -208,53 +433,183 @@ pima_indians_diabetes_center_transform <- predict(model_of_the_transform, # noli
 summary(pima_indians_diabetes_center_transform)
 
 # Standardize Data Transform ----
-## STEP 4. Apply a Standardize Data Transform ----
+## STEP 5. Apply a Standardize Data Transform ----
 # The standardize data transform ensures that each numeric attribute has a mean
 # value of 0 and a standard deviation of 1. This is done by combining the scale
 # data transform and the centre data transform.
 
+### Benefits of Standardizing ----
+#### 1. Enhances Model Performance ----
+# Many machine learning algorithms, such as support vector machines, k-nearest
+# neighbors, and principal component analysis, perform better when the input
+# features are on the same scale. Standardizing data can lead to improved model
+# performance and more reliable results.
+
+#### 2. Promotes Fair Comparison ----
+# Standardizing data allows for a fair and meaningful comparison of the
+# importance of different features. When features have different units or
+# measurement scales, it can be challenging to compare their contributions to a
+# model. Standardizing puts all features on the same scale, making these
+# comparisons more straightforward.
+
+#### 3. Facilitates Gradient Descent ----
+# In optimization algorithms like gradient descent, the scale of the features
+# can affect convergence. Features with large scales can dominate the learning
+# process and slow down convergence. Standardization can help mitigate this
+# problem by ensuring that all features have similar scales.
+
+#### 4. Simplifies Interpretation ----
+# Standardized coefficients in linear models are directly interpretable.
+# In linear regression, the coefficients represent the change in the dependent
+# variable associated with a one-standard-deviation change in the predictor
+# variable. This makes the interpretation of the model more intuitive.
+
+#### 5. Robust to Outliers ----
+# Standardization is less affected by outliers than some other scaling methods
+# like min-max scaling. Outliers have a limited impact on the mean and standard
+# deviation, so standardization can be a robust choice when dealing with data
+# containing outliers.
+
+#### 6. Improves Clustering and Dimensionality Reduction ----
+# In clustering and dimensionality reduction techniques like k-means clustering
+# and principal component analysis (PCA), the scale of the data can influence
+# the results. Standardizing data helps these techniques produce more
+# meaningful and stable results.
+
+#### 7. Easier Feature Engineering ----
+# When creating new features or interaction terms in models, standardizing the
+# variables involved can simplify the process and improve model
+# interpretability.
+
+# Standardizing data does not change the fundamental relationships in the data;
+# it merely transforms the scale. The choice to
+# standardize depends on the specific characteristics of the data and the
+# requirements of the analysis or model. In some cases, standardization is
+# necessary for the model to perform effectively, while in others, it may not be
+# required. The decision should be made based on the context and the nature of
+# the data.
+
 ### The Standardize Basic Transform on the Boston Housing Dataset ----
+# BEFORE
 summary(BostonHousing)
+sapply(BostonHousing[, -4], sd)
+
 model_of_the_transform <- preProcess(BostonHousing,
                                      method = c("scale", "center"))
 print(model_of_the_transform)
 boston_housing_standardize_transform <- predict(model_of_the_transform, # nolint
                                                 BostonHousing)
+
+# AFTER
 summary(boston_housing_standardize_transform)
+sapply(boston_housing_standardize_transform[, -4], sd)
 
 ### The Standardize Basic Transform on the Crop Dataset ----
+# BEFORE
 summary(crop_dataset)
+sapply(crop_dataset[, 4], sd)
 model_of_the_transform <- preProcess(crop_dataset,
                                      method = c("scale", "center"))
 print(model_of_the_transform)
 crop_data_standardize_transform <- predict(model_of_the_transform, crop_dataset) # nolint
+
+# AFTER
 summary(crop_data_standardize_transform)
+sapply(crop_data_standardize_transform[, 4], sd)
 
 ### The Standardize Basic Transform on the Iris Dataset ----
+# BEFORE
 summary(iris_dataset)
+sapply(iris_dataset[, 1:4], sd)
+
 model_of_the_transform <- preProcess(iris_dataset,
                                      method = c("scale", "center"))
 print(model_of_the_transform)
 iris_dataset_standardize_transform <- predict(model_of_the_transform, # nolint
                                               iris_dataset)
+
+# AFTER
 summary(iris_dataset_standardize_transform)
+sapply(iris_dataset_standardize_transform[, 1:4], sd)
 
 ### The Standardize Basic Transform on the Pima Indians Diabetes Dataset ----
+# BEFORE
 summary(PimaIndiansDiabetes)
+sapply(PimaIndiansDiabetes[, 1:8], sd)
+
 model_of_the_transform <- preProcess(PimaIndiansDiabetes,
                                      method = c("scale", "center"))
 print(model_of_the_transform)
 pima_indians_diabetes_standardize_transform <- predict(model_of_the_transform, # nolint
                                                        PimaIndiansDiabetes)
+
+# AFTER
 summary(pima_indians_diabetes_standardize_transform)
+sapply(pima_indians_diabetes_standardize_transform[, 1:8], sd)
 
 # Normalize Data Transform ----
 
-## STEP 5. Apply a Normalize Data Transform ----
-# Normalizing a dataset implies scaling the numerical data so that the values
-# are between [0, 1] (inclusive).
+## STEP 6. Apply a Normalize Data Transform ----
+# Normalizing a dataset implies ensuring the numerical data are
+# between [0, 1] (inclusive).
 
-### The Normalize Basic Transform on the Boston Housing Dataset ----
+### Benefits of the Normalize Data Transform ----
+#### 1. Comparability ----
+# Normalization allows for the comparison of variables with different units
+# and measurement scales. By transforming all features to the same scale, you
+# can evaluate their relative contributions more easily.
+
+#### 2. Improved Model Performance ----
+# Some machine learning algorithms, like neural networks, can benefit from
+# having input features within a certain range. Normalizing the data ensures
+# that the input features are within a consistent range, which can lead to
+# improved model performance.
+
+#### 3. Sensitivity to Magnitude ----
+# Certain algorithms are sensitive to the magnitude
+# of data, and this can lead to issues during training. Normalization reduces
+# the sensitivity to the scale of the input features, making the optimization
+# process more stable.
+
+#### 4. Facilitates Convergence ----
+# In optimization algorithms such as gradient descent,
+# having all input features within a similar scale can help algorithms converge
+# faster and reach a global minimum more efficiently.
+
+#### 5. Dimension Reduction Techniques ----
+# Normalization is often used in dimensionality
+# reduction techniques like PCA (Principal Component Analysis). Scaling the data
+# ensures that each dimension contributes equally to the computation of
+# principal components.
+
+#### 6. Handling Distance-Based Algorithms ----
+# Algorithms that rely on distance metrics, such as k-means clustering, are
+# sensitive to the scale of features. Normalizing the data helps prevent
+# features with larger scales from dominating the distance calculations.
+
+#### 7. Visualization ----
+# Normalized data can lead to more meaningful and interpretable visualizations,
+# especially when comparing different variables on the same plot.
+
+#### 8. Facilitates Feature Engineering ----
+# When creating interaction terms or composite features, normalizing the
+# variables involved can simplify the process and enhance the interpretability
+# of the model.
+
+#### 9. Prevents Overfitting ----
+# In some models, features with larger scales may be more prone to overfitting.
+# Normalizing data can help mitigate this issue.
+
+#### 10. Handling Multicollinearity ----
+# Normalizing can reduce multicollinearity, a situation where two or more
+# features are highly correlated. Reducing multicollinearity can make models
+# more interpretable.
+
+# Even though normalization is beneficial in many cases, it may not always be
+# necessary, especially when the data is already on a compatible scale for the
+# intended analysis.
+
+### The Normalize Transform on the Boston Housing Dataset ----
 summary(BostonHousing)
 model_of_the_transform <- preProcess(BostonHousing, method = c("range"))
 print(model_of_the_transform)
@@ -262,14 +617,14 @@ boston_housing_normalize_transform <- predict(model_of_the_transform, # nolint
                                               BostonHousing)
 summary(boston_housing_normalize_transform)
 
-### The Normalize Basic Transform on the Crop Dataset ----
+### The Normalize Transform on the Crop Dataset ----
 summary(crop_dataset)
 model_of_the_transform <- preProcess(crop_dataset, method = c("range"))
 print(model_of_the_transform)
 crop_data_normalize_transform <- predict(model_of_the_transform, crop_dataset)
 summary(crop_data_normalize_transform)
 
-### The Normalize Basic Transform on the Iris Dataset ----
+### The Normalize Transform on the Iris Dataset ----
 summary(iris_dataset)
 model_of_the_transform <- preProcess(iris_dataset, method = c("range"))
 print(model_of_the_transform)
@@ -277,7 +632,7 @@ iris_dataset_normalize_transform <- predict(model_of_the_transform, # nolint
                                             iris_dataset)
 summary(iris_dataset_normalize_transform)
 
-### The Normalize Basic Transform on the Pima Indians Diabetes Dataset ----
+### The Normalize Transform on the Pima Indians Diabetes Dataset ----
 summary(PimaIndiansDiabetes)
 model_of_the_transform <- preProcess(PimaIndiansDiabetes, method = c("range"))
 print(model_of_the_transform)
@@ -288,13 +643,13 @@ summary(pima_indians_diabetes_normalize_transform)
 
 # Box-Cox Power Transform ----
 
-## STEP 6. Apply a Box-Cox Power Transform ----
+## STEP 7. Apply a Box-Cox Power Transform ----
 # The skewness informs you of the asymmetry of the distribution of results.
 # Similar to kurtosis, there are several ways of computing the skewness. Using
 # “type = 2” (discussed in a previous Lab) can be interpreted as:
 #   1.	Skewness between -0.4 and 0.4 (inclusive) implies that there is no
-#       skew in the distribution of results; the distribution of results is
-#       symmetrical; it is a normal distribution.
+#         skew in the distribution of results; the distribution of results is
+#         symmetrical; it is a normal distribution.
 #   2.	Skewness above 0.4 implies a positive skew; a right-skewed distribution.
 #   3.	Skewness below -0.4 implies a negative skew; a left-skewed distribution.
 
@@ -303,12 +658,8 @@ summary(pima_indians_diabetes_normalize_transform)
 # distribution of an attribute and making the attribute have a more
 # Gaussian-like distribution.
 
-if (!is.element("e1071", installed.packages()[, 1])) {
-  install.packages("e1071", dependencies = TRUE)
-}
-require("e1071")
-
 ### Box-Cox Power Transform on the Boston Housing Dataset ----
+# BEFORE
 summary(BostonHousing)
 
 #Calculate the skewness before the Box-Cox transform
@@ -333,9 +684,11 @@ model_of_the_transform <- preProcess(BostonHousing, method = c("BoxCox"))
 print(model_of_the_transform)
 boston_housing_box_cox_transform <- predict(model_of_the_transform, # nolint
                                             BostonHousing)
+
+# AFTER
 summary(boston_housing_box_cox_transform)
 
-#Calculate the skewness after the Box-Cox transform
+# Calculate the skewness after the Box-Cox transform
 sapply(boston_housing_box_cox_transform[, -4],  skewness, type = 2)
 
 #Plot a histogram to view the skewness after the Box-Cox transform
@@ -367,7 +720,8 @@ hist(boston_housing_box_cox_transform[, 14],
      main = names(boston_housing_box_cox_transform)[14])
 
 ### Box-Cox Power Transform on the Crop Dataset ----
-summary(crop_dataset)
+# BEFORE
+summary(crop_data_standardize_transform)
 
 # Calculate the skewness before the Box-Cox transform
 sapply(crop_data_standardize_transform[, 4],  skewness, type = 2)
@@ -378,17 +732,23 @@ model_of_the_transform <- preProcess(crop_data_standardize_transform,
 print(model_of_the_transform)
 crop_data_box_cox_transform <- predict(model_of_the_transform,
                                        crop_data_standardize_transform)
+
+# AFTER
 summary(crop_data_box_cox_transform)
+
+sapply(crop_data_box_cox_transform[, 4],  skewness, type = 2)
+sapply(crop_data_box_cox_transform[, 4], sd)
 
 # Calculate the skewness after the Box-Cox transform
 sapply(crop_data_box_cox_transform[, 4],  skewness, type = 2)
 sapply(crop_data_box_cox_transform[, 4], sd)
 
-# Notice that none of the attributes qualify to be transformed using the Box
-# Cox data transform.
+# Notice that none of the attributes in the crop dataset qualify to be
+# transformed using the Box Cox data transform. Yield has negative values
+# after standardization.
 
 ### Box-Cox Power Transform on the Iris Dataset ----
-
+# BEFORE
 summary(iris_dataset)
 
 # Calculate the skewness before the Box-Cox transform
@@ -405,22 +765,7 @@ print(model_of_the_transform)
 
 iris_dataset_box_cox_transform <- predict(model_of_the_transform,
                                           iris_dataset)
-summary(iris_dataset_box_cox_transform)
-
-# Calculate the skewness after the Box-Cox transform
-sapply(iris_dataset_box_cox_transform[, 1:4],  skewness, type = 2)
-
-# Plot a histogram to view the skewness after the Box-Cox transform
-par(mfrow = c(1, 4))
-for (i in 1:4) {
-  hist(iris_dataset_box_cox_transform[, i],
-       main = names(iris_dataset_box_cox_transform)[i])
-}
-
-model_of_the_transform <- preProcess(iris_dataset, method = c("BoxCox"))
-print(model_of_the_transform)
-iris_dataset_box_cox_transform <- predict(model_of_the_transform,
-                                          iris_dataset)
+# AFTER
 summary(iris_dataset_box_cox_transform)
 
 # Calculate the skewness after the Box-Cox transform
@@ -434,6 +779,7 @@ for (i in 1:4) {
 }
 
 ### Box-Cox Power Transform on the Pima Indians Diabetes Dataset ----
+# BEFORE
 summary(PimaIndiansDiabetes)
 
 # Calculate the skewness before the Box-Cox transform
@@ -449,6 +795,8 @@ model_of_the_transform <- preProcess(PimaIndiansDiabetes, method = c("BoxCox"))
 print(model_of_the_transform)
 pima_indians_diabetes_box_cox_transform <- predict(model_of_the_transform, # nolint
                                                    PimaIndiansDiabetes)
+
+# AFTER
 summary(pima_indians_diabetes_box_cox_transform)
 
 # Calculate the skewness after the Box-Cox transform
@@ -462,9 +810,9 @@ for (i in 1:8) {
 }
 
 
-# Yeo-Johnson Power Transform ====
+# Yeo-Johnson Power Transform ----
 
-## STEP 7. Apply a Yeo-Johnson Power Transform ====
+## STEP 8. Apply a Yeo-Johnson Power Transform ----
 # Similar to the Box-Cox transform, the Yeo-Johnson transform reduces the
 # skewness by shifting the distribution of an attribute and making the
 # attribute have a more Gaussian-like distribution. The difference is that the
@@ -472,6 +820,7 @@ for (i in 1:8) {
 # transform.
 
 ### Yeo-Johnson Power Transform on the Boston Housing Dataset ----
+# BEFORE
 summary(BostonHousing)
 
 # Calculate the skewness before the Yeo-Johnson transform
@@ -496,6 +845,8 @@ model_of_the_transform <- preProcess(BostonHousing, method = c("YeoJohnson"))
 print(model_of_the_transform)
 boston_housing_yeo_johnson_transform <- predict(model_of_the_transform, # nolint
                                                 BostonHousing)
+
+# AFTER
 summary(boston_housing_yeo_johnson_transform)
 
 # Calculate the skewness after the Yeo-Johnson transform
@@ -530,6 +881,7 @@ hist(boston_housing_yeo_johnson_transform[, 14],
      main = names(boston_housing_yeo_johnson_transform)[14])
 
 ### Yeo-Johnson Power Transform on the Crop Dataset ----
+# BEFORE
 summary(crop_data_standardize_transform)
 
 # Calculate the skewness before the Yeo-Johnson transform
@@ -541,6 +893,8 @@ model_of_the_transform <- preProcess(crop_data_standardize_transform,
 print(model_of_the_transform)
 crop_data_yeo_johnson_transform <- predict(model_of_the_transform, # nolint
                                            crop_data_standardize_transform)
+
+# AFTER
 summary(crop_data_yeo_johnson_transform)
 
 # Calculate the skewness after the Yeo-Johnson transform
@@ -549,9 +903,11 @@ sapply(crop_data_yeo_johnson_transform[, 4], sd)
 
 # Notice that unlike the Box-Cox data transform, the Yeo-Johnson data
 # transform considers 1 of the attributes (yield) as qualified to be
-# transformed using the Yeo-Johnson transform.
+# transformed using the Yeo-Johnson transform. This is despite Yield
+# having negative values after standardization.
 
 ### Yeo-Johnson Power Transform on the Iris Dataset ----
+# BEFORE
 summary(iris_dataset)
 
 # Calculate the skewness before the Yeo-Johnson transform
@@ -566,8 +922,9 @@ for (i in 1:4) {
 model_of_the_transform <- preProcess(iris_dataset, method = c("YeoJohnson"))
 print(model_of_the_transform)
 iris_dataset_yeo_johnson_transform <- predict(model_of_the_transform, iris_dataset) # nolint
-summary(iris_dataset_yeo_johnson_transform)
 
+# AFTER
+summary(iris_dataset_yeo_johnson_transform)
 # Calculate the skewness after the Yeo-Johnson transform
 sapply(iris_dataset_yeo_johnson_transform[, 1:4],  skewness, type = 2)
 
@@ -579,6 +936,7 @@ for (i in 1:4) {
 }
 
 ### Yeo-Johnson Power Transform on the Pima Indians Diabetes Dataset ----
+# BEFORE
 summary(PimaIndiansDiabetes)
 
 # Calculate the skewness before the Yeo-Johnson transform
@@ -595,6 +953,8 @@ model_of_the_transform <- preProcess(PimaIndiansDiabetes,
 print(model_of_the_transform)
 pima_indians_diabetes_yeo_johnson_transform <- predict(model_of_the_transform, # nolint
                                                        PimaIndiansDiabetes)
+
+# AFTER
 summary(pima_indians_diabetes_yeo_johnson_transform)
 
 # Calculate the skewness after the Yeo-Johnson transform
@@ -671,7 +1031,7 @@ for (i in 1:8) {
 # identification of the features that are most represented in the principal
 # or independent components.
 
-## STEP 8.a. PCA Linear Algebra Transform for Dimensionality Reduction ----
+## STEP 9.a. PCA Linear Algebra Transform for Dimensionality Reduction ----
 # Principal Component Analysis (PCA) is a statistical approach that can be used
 # to analyse high-dimensional data and capture the most important information
 # (principal components) from it. This is done by transforming the original
@@ -730,7 +1090,7 @@ pima_indians_diabetes_pca_transform <- predict(model_of_the_transform, # nolint
                                                PimaIndiansDiabetes)
 summary(pima_indians_diabetes_pca_transform)
 
-## STEP 8.b. PCA Linear Algebra Transform for Feature Extraction ----
+## STEP 9.b. PCA Linear Algebra Transform for Feature Extraction ----
 
 # We use the `princomp()` function is used to perform PCA on a correlation
 # matrix.
@@ -833,7 +1193,7 @@ fviz_pca_var(pima_indians_diabetes_fe, col.var = "cos2",
 
 
 # Independent Component Analysis (ICA) Linear Algebra Transform ----
-## STEP 9. ICA Linear Algebra Transform for Dimensionality Reduction ----
+## STEP 10. ICA Linear Algebra Transform for Dimensionality Reduction ----
 
 # Independent Component Analysis (ICA) transforms the data to return only the
 # independent components. The n.comp argument is required to specify the
@@ -883,13 +1243,12 @@ pima_indians_diabetes_ica <- predict(model_of_the_transform,
 
 summary(pima_indians_diabetes_ica)
 
-
-### *** Deinitialization: Create a snapshot of the R environment ----
+# [OPTIONAL] **Deinitialization: Create a snapshot of the R environment ----
 # Lastly, as a follow-up to the initialization step, record the packages
 # installed and their sources in the lockfile so that other team-members can
 # use renv::restore() to re-install the same package version in their local
 # machine during their initialization step.
-renv::snapshot()
+# renv::snapshot() # nolint
 
 # References ----
 ## Bevans, R. (2023). Sample Crop Data Dataset for ANOVA (Version 1) [Dataset]. Scribbr. https://www.scribbr.com/wp-content/uploads//2020/03/crop.data_.anova_.zip # nolint ----
