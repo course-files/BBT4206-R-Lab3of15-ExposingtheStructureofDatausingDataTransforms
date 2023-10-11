@@ -242,7 +242,7 @@ data("PimaIndiansDiabetes")
 # model. When features have different scales, it can be challenging to
 # interpret their relative contributions.
 
-#### 3.Enhancing Model Performance ----
+#### 3. Enhancing Model Performance ----
 # Some machine learning algorithms, like k-nearest neighbors and principal
 # component analysis, are sensitive to the scale of the data. Scaling can lead
 # to better model performance and more reliable results.
