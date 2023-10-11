@@ -136,7 +136,7 @@ if (require("languageserver")) {
 # datasets. The preparation of the model of the transform is done using the
 # preProcess() function. The model of the transform can then be applied to a
 # dataset in either of the following two ways:
-#   (i)	Standalone: The model of the transform is passed to the predict()
+#   (i)	  Standalone: The model of the transform is passed to the predict()
 #         function
 #   (ii)	Training: The model of the transform is passed to the train()
 #         function via the preProcess argument. This is done during the model
@@ -1195,7 +1195,6 @@ factoextra::fviz_cos2(pima_indians_diabetes_fe,
 factoextra::fviz_pca_var(pima_indians_diabetes_fe, col.var = "cos2",
                          gradient.cols = c("red", "black", "green"),
                          repel = TRUE)
-
 
 # Independent Component Analysis (ICA) Linear Algebra Transform ----
 ## STEP 10. ICA Linear Algebra Transform for Dimensionality Reduction ----
