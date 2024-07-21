@@ -1,4 +1,4 @@
-# BBT4206
+# BBT4206 - R
 
 These are course files (instructional materials) for the **BBT4206: Business Intelligence II** course using **R**.
 
